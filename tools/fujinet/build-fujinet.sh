@@ -280,15 +280,15 @@ patch("fujinet_pc.cmake", [
         'endif()\n',
     ),
     (
-        'target_link_libraries(fujinet pthread expat cjson cjson_utils smb2 ssh nfs)\n',
+        'target_link_libraries(fujinet pthread expat cjson cjson_utils smb2 ssh nfs gumbo_fn)\n',
         'if(FUJINET_ANDROID)\n'
         '    set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)\n'
         '    set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)\n'
         '    add_subdirectory(components/expat/expat/expat)\n'
         '    find_library(ANDROID_LOG_LIB log)\n'
-        '    target_link_libraries(fujinet expat cjson cjson_utils smb2 ssh nfs ${ANDROID_LOG_LIB})\n'
+        '    target_link_libraries(fujinet expat cjson cjson_utils smb2 ssh nfs gumbo_fn ${ANDROID_LOG_LIB})\n'
         'else()\n'
-        '    target_link_libraries(fujinet pthread expat cjson cjson_utils smb2 ssh nfs)\n'
+        '    target_link_libraries(fujinet pthread expat cjson cjson_utils smb2 ssh nfs gumbo_fn)\n'
         'endif()\n',
     ),
     (

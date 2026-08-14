@@ -28,6 +28,7 @@ tools/fujinet/work/
 # IntelliJ
 *.iml
 .idea/
+.claude/
 .kotlin/
 .planning/
 misc.xml
