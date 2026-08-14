@@ -1,0 +1,17 @@
+repository: https://github.com/FujiNetWIFI/fujinet-go-intv
+description: FujiNet Go Intv is a portable Intellivision emulator for Android with built-in FujiNet support, bringing modern networking to classic gaming. Run your favorite Intellivision software, with ECS and Intellivoice support, while accessing network-hosted disk images, services, and multiplayer experiences just like real FujiNet hardware, but entirely in software. The jzIntv emulator and the FujiNet firmware run together in one app, joined over a loopback socket. Import your own system ROMs and cartridges, and play with the on-screen disc, keypad, and action buttons -- just like the real Master Component controller. Take your Intellivision anywhere! No cables, no disks, no limits!
+summary: FujiNet Go Intv brings the classic Intellivision gaming experience to Android with built-in FujiNet support
+tags:
+    - retrocomputing
+    - intellivision
+    - jzintv
+    - vintagecomputing
+    - emulation
+    - emulator
+    - fujinet
+    - games
+    - retrogaming
+    - gaming
+license: GPL-3.0
+metadata_sources:
+    - github

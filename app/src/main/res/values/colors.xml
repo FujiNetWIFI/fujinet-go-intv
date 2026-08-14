@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- FujiNet Go Intv launcher icon background: the Intellivision's dark
+         green console shell (also the UI accent for buttons/toolbar/controls;
+         see tools/icons/make-icons.py BACKGROUND and ui/theme/Theme.kt). -->
+    <color name="ic_launcher_background">#1E4912</color>
+</resources>
