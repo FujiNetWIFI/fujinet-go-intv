@@ -144,6 +144,15 @@ fun EmulatorScreen(
                     IntvActions(session, controllerSide, haptics)
                 }
             }
+        } else if (landscape && overlay == Overlay.ECS_KEYBOARD) {
+            // The keyboard splits into two halves flanking the surface in
+            // the pillar-box margins, same shape as the rest of the family's
+            // LandscapeSplitKeyboard.
+            LandscapeSplitEcsKeyboard(
+                session = session,
+                hapticsEnabled = haptics,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+            )
         } else {
             Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 EmulatorSurface(session = session, modifier = Modifier.fillMaxSize())

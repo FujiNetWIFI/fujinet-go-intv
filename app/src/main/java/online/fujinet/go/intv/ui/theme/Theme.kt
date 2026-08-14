@@ -18,7 +18,7 @@ val IntvGreen = Color(0xFF1E4912)
 val SticYellow = Color(0xFFFFFF01)
 
 private val IntvInk = Color(0xFF0A1409)      // near-black, green-shifted
-private val IntvMist = Color(0xFFE8F2E4)     // off-white, used for legends/icons
+val IntvMist = Color(0xFFE8F2E4)             // off-white, used for legends/icons
 val IntvOutline = Color(0xFF2E6B1C)
 
 // Contrast note: #1E4912 is ~9:1 against white but only ~1.6:1 against
