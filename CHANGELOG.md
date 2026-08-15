@@ -1,6 +1,29 @@
 # Changelog
 
-## 0.1.0 (in progress)
+## 0.2.0
+
+Boots the larger Intellivision cartridges that previously failed with
+ERR CODE 3, hangs, or corrupted graphics. All changes arrive through the
+restaged desktop core and the rebuilt FujiNet runtime; see
+fujinet-go-intv-desktop 0.4.0 and fujinet-firmware `fix-intv-bigger-carts`
+(6577aa2c2) for the underlying work.
+
+### Changed
+- **jzIntv FujiNet peripheral** (staged from the desktop repo): `.cfg`
+  sidecar mappings clamp at end-of-file (SDK-1600 bin2rom semantics)
+  instead of dropping oversized lines; a mapping that covers the FujiNet
+  mailbox window ($9C00–$9F3F) boots with the mailbox disabled for the
+  session instead of being rejected; `[memattr]` cartridge RAM is honored
+  (8/16-bit, capped at the hardware's 0x2800-word budget); 40KB/48KB bare
+  `.bin` images get sensible default maps; abort-CLOSE from the runtime
+  discards a failed push instead of booting partial data.
+- **FujiNet runtime** (`libfujinet.so`): finds `.cfg` sidecars on hosts
+  with a path prefix set (the sibling probe was double-prefixing), verifies
+  the pushed byte count, and aborts cleanly on short transfers.
+- **Embedded FujiNet config ROM**: boot failures now name their reason on
+  screen (NO MAPPING, TRUNCATED XFER, JLP CONFLICT, ...).
+
+## 0.1.0
 
 Initial Android port of fujinet-go-intv-desktop, matching the shape of the
 other FujiNet Go family members (800, Apple2, Adam, CoCo, MSX, MS-DOS).
