@@ -599,7 +599,20 @@ copy_shared_outputs() {
     mkdir -p "${GENERATED_ASSET_ROOT}"
     cp -R "${dist_dir}/data" "${GENERATED_ASSET_ROOT}/data"
     cp -R "${dist_dir}/SD" "${GENERATED_ASSET_ROOT}/SD"
-    cp "${dist_dir}/fnconfig.ini" "${GENERATED_ASSET_ROOT}/fnconfig.ini"
+    # Prefer the firmware's own per-target default config over the generic
+    # one the PC build drops in dist/. The generic file is Atari-flavoured
+    # (hsioindex, [Cassette], enable_apetime/enable_pclink, and a host list of
+    # Atari community TNFS servers) and nothing in the build selects the
+    # per-target file for a PC target, so without this the app boots into
+    # CONFIG showing Atari hosts.
+    local target_cfg="${CLONE_DIR}/data/webui/device_specific/BUILD_${PC_TARGET}/fnconfig.ini"
+    if [[ -f "${target_cfg}" ]]; then
+        echo "Using the firmware's BUILD_${PC_TARGET} default fnconfig.ini"
+        cp "${target_cfg}" "${GENERATED_ASSET_ROOT}/fnconfig.ini"
+    else
+        echo "No BUILD_${PC_TARGET}/fnconfig.ini in the firmware tree; using the generic dist one" >&2
+        cp "${dist_dir}/fnconfig.ini" "${GENERATED_ASSET_ROOT}/fnconfig.ini"
+    fi
     force_boip_config
     printf '%s (%s)\n' "${PC_TARGET}" "$(git -C "${FUJINET_SRC}" rev-parse --short HEAD 2>/dev/null || echo local)" \
         > "${GENERATED_ASSET_ROOT}/upstream-commit.txt"
