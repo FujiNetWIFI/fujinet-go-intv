@@ -188,11 +188,23 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (intvRoms) {
-                // -PintvRoms is a dev-only convenience for local debug builds.
-                // A release build carrying it would ship Mattel-copyrighted
-                // system ROMs -- refuse outright instead of relying on
-                // verifyNoEmbeddedRoms to catch it after the fact.
+        }
+    }
+
+    if (intvRoms) {
+        // -PintvRoms is a dev-only convenience for local debug builds. A
+        // release build carrying it would ship Mattel-copyrighted system
+        // ROMs -- refuse outright instead of relying on
+        // verifyNoEmbeddedRoms to catch it after the fact. Checked against
+        // the task graph (not at buildTypes{} configuration time) so this
+        // doesn't also trip on unrelated debug-only invocations such as
+        // `assembleDebug`, since Gradle configures every build type's DSL
+        // block regardless of which task is actually requested.
+        gradle.taskGraph.whenReady {
+            val releaseTaskRequested = allTasks.any { task ->
+                task.path.contains(":app:") && task.name.contains("Release")
+            }
+            if (releaseTaskRequested) {
                 throw GradleException(
                     "-PintvRoms=true is a dev-only flag; refusing a release build with it set. " +
                         "See COMPLIANCE.md."
