@@ -13,7 +13,32 @@ import online.fujinet.go.intv.core.EmulatorNative
  */
 object RomStore {
     fun romsDir(context: Context): File =
-        File(File(context.filesDir, "intv"), "roms").apply { mkdirs() }
+        File(File(context.filesDir, "intv"), "roms").apply { mkdirs() }.also { stageEmbeddedRoms(context, it) }
+
+    // Dev-only, -PintvRoms=true builds ship exec.bin/grom.bin/ecs.bin under
+    // assets/intv-roms; release builds ship none (see COMPLIANCE.md). This
+    // must run before hasSystemRoms()/status() are read anywhere -- both
+    // RomGate (the pre-session check) and SessionController.startIfNeeded()
+    // (which historically only staged via RuntimeInstaller.install() *after*
+    // confirming ROMs were present) otherwise deadlock: nothing ever copies
+    // the bundled ROMs out of assets in the first place. Only fills in what's
+    // missing, so a user-imported ROM always wins over the compiled-in one.
+    private fun stageEmbeddedRoms(context: Context, dir: File) {
+        fun copyIfMissing(name: String) {
+            val dest = File(dir, name)
+            if (dest.exists()) return
+            try {
+                context.assets.open("intv-roms/$name").use { input ->
+                    dest.outputStream().use { output -> input.copyTo(output) }
+                }
+            } catch (_: Exception) {
+                // Absent asset (release build, or no -PintvRoms) -- expected.
+            }
+        }
+        copyIfMissing("exec.bin")
+        copyIfMissing("grom.bin")
+        copyIfMissing("ecs.bin")
+    }
 
     fun cartsDir(context: Context): File =
         File(File(context.filesDir, "intv"), "carts").apply { mkdirs() }

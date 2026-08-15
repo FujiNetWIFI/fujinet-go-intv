@@ -3,6 +3,7 @@ package online.fujinet.go.intv
 import android.content.Context
 import android.content.res.AssetManager
 import java.io.File
+import online.fujinet.go.intv.settings.RomStore
 
 /**
  * Stages the bundled runtime trees from APK assets into the writable
@@ -33,14 +34,11 @@ class RuntimeInstaller(private val context: Context) {
             copyAssetDir("fujinet", fujinetRoot)
         }
 
-        val romsDir = File(root, "roms").apply { mkdirs() }
-        // Dev-only, -PintvRoms=true builds: stage exec.bin/grom.bin/ecs.bin
-        // from assets/intv-roms if present -- but only ever fill in what's
-        // missing, so a user-imported ROM always wins over the compiled-in
-        // one (same rule the native intv_host_provision_roms table applies).
-        copyAssetIfMissing("intv-roms/exec.bin", File(romsDir, "exec.bin"))
-        copyAssetIfMissing("intv-roms/grom.bin", File(romsDir, "grom.bin"))
-        copyAssetIfMissing("intv-roms/ecs.bin", File(romsDir, "ecs.bin"))
+        // RomStore.romsDir() stages exec.bin/grom.bin/ecs.bin from
+        // assets/intv-roms (dev-only, -PintvRoms=true builds) as a side
+        // effect of computing the path -- see its stageEmbeddedRoms() for why
+        // that has to happen there rather than here.
+        val romsDir = RomStore.romsDir(context)
 
         val cartsDir = File(root, "carts").apply { mkdirs() }
 
@@ -49,18 +47,6 @@ class RuntimeInstaller(private val context: Context) {
             romsDir = romsDir.absolutePath,
             cartsDir = cartsDir.absolutePath,
         )
-    }
-
-    private fun copyAssetIfMissing(assetPath: String, dest: File) {
-        if (dest.exists()) return
-        try {
-            context.assets.open(assetPath).use { input ->
-                dest.outputStream().use { output -> input.copyTo(output) }
-            }
-        } catch (_: Exception) {
-            // Absent asset (release build, or no -PintvRoms) -- expected; the
-            // ROM gate (ui/RomGate.kt) handles prompting the user to import.
-        }
     }
 
     private fun copyAssetDir(assetPath: String, dest: File) {
