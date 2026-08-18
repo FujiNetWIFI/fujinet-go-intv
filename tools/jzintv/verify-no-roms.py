@@ -15,9 +15,16 @@ release build -- -PintvRoms is refused by the release build type before this
 even runs, but this check doesn't trust that alone). So this walks every
 regular file under the given directories, not just one binary.
 
-usage: verify-no-roms.py <dir>...
+usage: verify-no-roms.py [--require] <dir>...
+
+With --require, the inability to run the check (no scan dirs, no local ROM
+images to probe with) is itself a failure -- release builds must not pass on
+a machine where the check silently could not run. Without it, those cases
+skip with a warning, so dev machines without the reference dumps aren't
+blocked. INTV_ROMS_DIR overrides where the reference ROM images are found.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -25,8 +32,10 @@ PROBE = 64
 
 # The desktop repo's tools/jzintv/roms/ (or a locally staged
 # assets-generated/intv-roms/, if this ever runs against a dev tree by
-# mistake) is the source of the ROM images to probe for.
+# mistake) is the source of the ROM images to probe for. INTV_ROMS_DIR, when
+# set, is searched first.
 ROM_SEARCH_DIRS = [
+    *([Path(os.environ["INTV_ROMS_DIR"])] if os.environ.get("INTV_ROMS_DIR") else []),
     Path.home() / "Workspace" / "fujinet-go-intv-desktop" / "tools" / "jzintv" / "roms",
 ]
 
@@ -62,11 +71,18 @@ def find_rom_dir():
 
 
 def main():
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+    require = "--require" in args
+    args = [a for a in args if a != "--require"]
+    if not args:
         sys.exit(__doc__)
 
-    scan_dirs = [Path(p) for p in sys.argv[1:] if Path(p).is_dir()]
+    scan_dirs = [Path(p) for p in args if Path(p).is_dir()]
     if not scan_dirs:
+        if require:
+            print("verify-no-roms: FAIL: none of the scan directories exist "
+                  f"({args}); with --require the check must actually run")
+            return 1
         # Nothing to scan (e.g. the release build hasn't produced merged
         # assets/libs under the expected paths yet) -- not a failure, since
         # the release build type already refuses -PintvRoms outright; this
@@ -77,8 +93,13 @@ def main():
 
     romdir = find_rom_dir()
     if romdir is None:
-        print("verify-no-roms: no local ROM images found to probe with "
-              f"(checked {[str(d) for d in ROM_SEARCH_DIRS]}); skipping -- "
+        msg = ("verify-no-roms: no local ROM images found to probe with "
+               f"(checked {[str(d) for d in ROM_SEARCH_DIRS]}; "
+               "set INTV_ROMS_DIR to override)")
+        if require:
+            print(f"{msg} -- FAIL under --require")
+            return 1
+        print(f"{msg}; skipping -- "
               "this only means we couldn't test, not that the build is clean")
         return 0
 
@@ -105,6 +126,11 @@ def main():
                 continue
 
     if checked == 0:
+        if require:
+            print("verify-no-roms: FAIL: no ROM images had a distinctive "
+                  "slice to probe with; with --require the check must "
+                  "actually run")
+            return 1
         print("verify-no-roms: no ROM images had a distinctive slice to "
               "probe with; skipping")
         return 0

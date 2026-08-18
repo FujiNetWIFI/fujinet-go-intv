@@ -103,8 +103,14 @@ val verifyNoEmbeddedRoms by tasks.registering(Exec::class) {
     workingDir = rootProject.projectDir
     commandLine(
         "python3", rootProject.file("tools/jzintv/verify-no-roms.py").absolutePath,
+        "--require",
         project.file("build/intermediates/assets/release").absolutePath,
         project.file("build/intermediates/merged_native_libs/release").absolutePath
+    )
+    // The scan targets are merge outputs -- without this ordering the check
+    // can run against directories that don't exist yet and prove nothing.
+    mustRunAfter(
+        tasks.matching { it.name.startsWith("merge") && it.name.contains("Release") }
     )
 }
 
@@ -124,7 +130,7 @@ tasks.matching { task ->
     dependsOn(prepareJzIntvCore, prepareFujiNetRuntime)
 }
 
-tasks.matching { it.name == "assembleRelease" }.configureEach {
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
     dependsOn(verifyNoEmbeddedRoms)
 }
 
@@ -148,8 +154,8 @@ android {
         applicationId = "online.fujinet.go.intv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "1.0.0"
         buildConfigField("String", "JZINTV_VERSION", "\"${jzIntvVersion}\"")
         buildConfigField("String", "FUJINET_RUNTIME_VERSION", "\"${fujiNetRuntimeVersion}\"")
         buildConfigField("boolean", "DEV_ROMS", intvRoms.toString())
@@ -184,6 +190,7 @@ android {
         release {
             isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release")
+            ndk { debugSymbolLevel = "FULL" }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

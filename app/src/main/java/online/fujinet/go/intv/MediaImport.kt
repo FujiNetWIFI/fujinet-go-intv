@@ -12,16 +12,32 @@ import online.fujinet.go.intv.settings.RomStore
  * cartridges. Modelled on fujinet-go-msdos's MediaImport.kt: copy the picked
  * document into app-private storage, then classify it.
  *
- * System ROMs are classified by **exact byte size**, not filename or
- * extension -- SAF display names are arbitrary, but exec.bin/grom.bin/
- * ecs.bin have fixed, known sizes (see Intv.EXEC_SIZE/GROM_SIZE/ECS_SIZE).
+ * System ROMs are classified by **exact byte size and CRC32**, not filename
+ * or extension -- SAF display names are arbitrary, and size alone can't tell
+ * an 8 KB cartridge from exec.bin (an earlier size-only version of this code
+ * would silently corrupt the EXEC slot with such a pick). The system images
+ * each have a single canonical revision, so an exact CRC match is safe.
  */
 object MediaImport {
 
     sealed class RomImportResult {
         data class Success(val fileName: String) : RomImportResult()
         data class WrongSize(val actualSize: Long) : RomImportResult()
+        /** Right size for [wouldBe], but not the known dump -- likely a cartridge. */
+        data class WrongCrc(val wouldBe: String, val actualCrc: Long) : RomImportResult()
         object ReadFailed : RomImportResult()
+    }
+
+    /** Pure size+CRC classification, split out so it is unit-testable. */
+    internal fun classify(size: Long, crc: Long): RomImportResult {
+        val (name, expectedCrc) = when (size) {
+            Intv.EXEC_SIZE.toLong() -> "exec.bin" to Intv.EXEC_CRC32
+            Intv.GROM_SIZE.toLong() -> "grom.bin" to Intv.GROM_CRC32
+            Intv.ECS_SIZE.toLong() -> "ecs.bin" to Intv.ECS_CRC32
+            else -> return RomImportResult.WrongSize(size)
+        }
+        if (crc != expectedCrc) return RomImportResult.WrongCrc(name, crc)
+        return RomImportResult.Success(name)
     }
 
     fun importSystemRom(context: Context, uri: Uri): RomImportResult {
@@ -29,13 +45,12 @@ object MediaImport {
         val temp = File(romsDir, ".import-tmp")
         val copied = copyTo(context, uri, temp) ?: return RomImportResult.ReadFailed
 
-        val target = when (copied.length()) {
-            Intv.EXEC_SIZE.toLong() -> "exec.bin"
-            Intv.GROM_SIZE.toLong() -> "grom.bin"
-            Intv.ECS_SIZE.toLong() -> "ecs.bin"
+        val verdict = classify(copied.length(), crc32Of(copied))
+        val target = when (verdict) {
+            is RomImportResult.Success -> verdict.fileName
             else -> {
                 copied.delete()
-                return RomImportResult.WrongSize(copied.length())
+                return verdict
             }
         }
         val dest = File(romsDir, target)
@@ -60,6 +75,19 @@ object MediaImport {
         if (ext !in setOf("rom", "bin", "int", "cfg")) return null
         val dest = File(RomStore.cartsDir(context), name)
         return copyTo(context, uri, dest)
+    }
+
+    private fun crc32Of(file: File): Long {
+        val crc = java.util.zip.CRC32()
+        file.inputStream().use { input ->
+            val buf = ByteArray(64 * 1024)
+            while (true) {
+                val n = input.read(buf)
+                if (n < 0) break
+                crc.update(buf, 0, n)
+            }
+        }
+        return crc.value
     }
 
     private fun copyTo(context: Context, uri: Uri, dest: File): File? {

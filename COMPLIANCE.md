@@ -50,11 +50,13 @@ in a release build.**
   when Gradle is invoked with the dev-only `-PintvRoms=true` property. The
   `release` build type in `app/build.gradle.kts` **throws** if that property
   is set, refusing to produce a release artifact that carries ROMs.
-- `assembleRelease` additionally depends on `verifyNoEmbeddedRoms`
-  (`tools/jzintv/verify-no-roms.py`), which scans the merged release assets
-  and native libraries for the three ROMs' byte signatures and fails the
-  build if any are found. This is a mechanical check, not a documentation
-  promise.
+- `assembleRelease` **and** `bundleRelease` additionally depend on
+  `verifyNoEmbeddedRoms` (`tools/jzintv/verify-no-roms.py --require`), which
+  scans the merged release assets and native libraries for the three ROMs'
+  byte signatures after asset/lib merging and fails the build if any are
+  found — or if the check itself cannot run (missing scan dirs or reference
+  dumps; set `INTV_ROMS_DIR` to point at the reference images). This is a
+  mechanical check that fails closed, not a documentation promise.
 - End users import their own dumped `exec.bin` / `grom.bin` / `ecs.bin` (and
   any cartridges) via Settings → System ROMs / Cartridge, using the Storage
   Access Framework. Nothing is fetched from the network or bundled.

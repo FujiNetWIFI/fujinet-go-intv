@@ -58,6 +58,14 @@ fun RomGate(onImported: () -> Unit, modifier: Modifier = Modifier) {
                     Toast.LENGTH_LONG,
                 ).show()
             }
+            is MediaImport.RomImportResult.WrongCrc -> {
+                Toast.makeText(
+                    context,
+                    "Right size for ${result.wouldBe} but not the known dump -- " +
+                        "cartridges are imported from Settings, not here",
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
             MediaImport.RomImportResult.ReadFailed -> {
                 Toast.makeText(context, "Could not read the selected file", Toast.LENGTH_SHORT).show()
             }

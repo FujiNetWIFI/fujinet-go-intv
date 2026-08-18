@@ -69,6 +69,12 @@ fun SettingsScreen(
                 Toast.makeText(context, "Imported ${result.fileName}", Toast.LENGTH_SHORT).show()
             is MediaImport.RomImportResult.WrongSize ->
                 Toast.makeText(context, "Not a recognized ROM (${result.actualSize} bytes)", Toast.LENGTH_LONG).show()
+            is MediaImport.RomImportResult.WrongCrc ->
+                Toast.makeText(
+                    context,
+                    "Right size for ${result.wouldBe} but not the known dump -- use the cartridge picker for game ROMs",
+                    Toast.LENGTH_LONG,
+                ).show()
             MediaImport.RomImportResult.ReadFailed ->
                 Toast.makeText(context, "Could not read the selected file", Toast.LENGTH_SHORT).show()
         }

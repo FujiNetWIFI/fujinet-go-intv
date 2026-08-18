@@ -152,4 +152,9 @@ if [[ "${WITH_ROMS}" -eq 1 ]]; then
   ================================================================
 
 BANNER
+else
+    # Without --with-roms this must be a distributable tree: remove any ROMs
+    # staged by an earlier dev build, or they'd ride along into the release
+    # merged assets (verifyNoEmbeddedRoms catches this, but fix the cause).
+    rm -rf "${ROMS_OUT}"
 fi

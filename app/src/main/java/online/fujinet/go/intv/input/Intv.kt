@@ -95,4 +95,13 @@ object Intv {
     const val EXEC_SIZE = 8192
     const val GROM_SIZE = 2048
     const val ECS_SIZE = 12 * 1024 * 2
+
+    /**
+     * CRC32 of the canonical Mattel dumps. Size alone can't distinguish an
+     * 8 KB cartridge from exec.bin, so imports must match both size and CRC
+     * (these images have a single known-good revision each).
+     */
+    const val EXEC_CRC32 = 0xCBCE86F7L
+    const val GROM_CRC32 = 0x683A4158L
+    const val ECS_CRC32 = 0xEA790A06L
 }

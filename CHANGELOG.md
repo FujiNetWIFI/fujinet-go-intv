@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.0
+
+Google Play readiness release. No emulation changes.
+
+### Added
+- Release signing via `keystore.properties` (shared FujiNet Go upload
+  keystore) and `tools/release-play.sh` to build the signed AAB for Play.
+- Privacy policy (`docs/index.md`, published via GitHub Pages) and
+  `docs/play-checklist.md` covering the console-side submission steps.
+- Unit tests for system-ROM import classification.
+
+### Changed
+- **System ROM import now verifies CRC32**, not just file size. An 8 KB
+  cartridge picked at the ROM gate previously overwrote `exec.bin`
+  silently; it is now rejected with an explanatory message.
+- `verify-no-roms.py` fails closed during release builds (`--require`):
+  a machine where the check cannot run no longer passes it. The check now
+  also runs for `bundleRelease` (it previously only guarded
+  `assembleRelease`) and is ordered after asset/lib merging so it scans
+  real output. `INTV_ROMS_DIR` overrides the reference-dump location.
+- Cleartext HTTP is now scoped to the loopback FujiNet web UI via a
+  network security config instead of `usesCleartextTraffic="true"`.
+- Release builds carry full native debug symbols for Play crash reports.
+
 ## 0.2.0
 
 Boots the larger Intellivision cartridges that previously failed with
