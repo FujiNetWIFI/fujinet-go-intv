@@ -88,10 +88,11 @@ fun IntvController(
 
 /**
  * The 16-way disc. Emits [SessionController.padDisc] only on direction
- * change (and -1 on release), snapped to the 8 compass positions via
- * [DiscGeometry.discDirection] -- see that object for why the 8 odd
- * half-steps are never emitted. A single owning pointer, so a second finger
- * landing on the keypad can never steal the disc mid-drag.
+ * change (and -1 on release), resolved to all 16 positions via
+ * [DiscGeometry.discDirection16] -- a fingertip is precise enough to aim at
+ * a 22.5-degree sector, unlike the analog stick [GameControllerMapper]
+ * feeds; see that object for the distinction. A single owning pointer, so a
+ * second finger landing on the keypad can never steal the disc mid-drag.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -111,7 +112,7 @@ fun IntvDisc(
         val cx = padSize.width / 2f
         val cy = padSize.height / 2f
         val radius = min(padSize.width, padSize.height) / 2f
-        val dir = DiscGeometry.discDirection(px - cx, py - cy, radius)
+        val dir = DiscGeometry.discDirection16(px - cx, py - cy, radius)
         if (dir != direction) {
             direction = dir
             if (hapticsEnabled && dir != Intv.DISC_NONE) emit()
@@ -183,17 +184,21 @@ fun IntvDisc(
                 )
             }
 
-            // Active wedge: a 45deg fan centered on the current direction,
-            // drawn as a filled polygon (a handful of line segments rather
-            // than an arc, to sidestep Canvas's clockwise-from-3-o'clock
-            // angle convention entirely).
+            // Active wedge: exactly the 22.5deg sector the touch landed in,
+            // so the lit wedge is always the one bounded by the two spokes
+            // the finger is between. Drawn as a filled polygon (a handful
+            // of line segments rather than an arc, to sidestep Canvas's
+            // clockwise-from-3-o'clock angle convention entirely) -- the
+            // desktop keypad windows draw theirs the same way and for the
+            // same reason.
             if (direction != Intv.DISC_NONE) {
-                val center = direction * 22.5
+                val center = direction * DiscGeometry.SECTOR_DEG
                 val path = Path().apply {
                     moveTo(cx, cy)
                     val steps = 6
                     for (i in 0..steps) {
-                        val a = center - 22.5 + (45.0 * i / steps)
+                        val a = center - DiscGeometry.SECTOR_DEG / 2 +
+                            (DiscGeometry.SECTOR_DEG * i / steps)
                         val p = pt(a, r)
                         lineTo(p.x, p.y)
                     }
@@ -202,11 +207,11 @@ fun IntvDisc(
                 drawPath(path, color = SticYellow.copy(alpha = 0.85f))
             }
 
-            // 16 spokes at the half-step boundaries (matching the desktop
-            // keypad window's outline), plus the 8 compass labels' tick
-            // marks slightly heavier.
-            for (i in 0 until 16) {
-                val a = i * 22.5 - 11.25 // boundary between half-steps
+            // One spoke per sector boundary -- 16 of them, at the half-way
+            // angles BETWEEN the 16 positions, matching the desktop keypad
+            // window's outline.
+            for (i in 0 until DiscGeometry.POSITIONS) {
+                val a = i * DiscGeometry.SECTOR_DEG - DiscGeometry.SECTOR_DEG / 2
                 val inner = pt(a, hubR)
                 val outer = pt(a, r)
                 drawLine(IntvOutline, inner, outer, strokeWidth = 1.5f)

@@ -10,7 +10,7 @@ import kotlin.math.abs
  * (the disc + three action buttons -- there is no gamepad-to-keypad-digit
  * mapping, matching the desktop's own gamepad_sdl.c). The left stick and the
  * d-pad (as AXIS_HAT motion or KEYCODE_DPAD_* keys) both drive the 8-way
- * disc via [DiscGeometry.discDirection]; A/X, B/Y and the shoulder buttons
+ * disc via [DiscGeometry.discDirection8]; A/X, B/Y and the shoulder buttons
  * map to the three action buttons.
  */
 class GameControllerMapper(
@@ -72,7 +72,9 @@ class GameControllerMapper(
         // Treat the unit stick circle as radius 1; DiscGeometry's own
         // deadzone fraction (0.22) is smaller than a typical stick deadzone,
         // but pushDirection already zeroed out sub-deadzone axis values above.
-        val direction = DiscGeometry.discDirection(x, y, 1f)
+        // 8-way, unlike the touch disc's 16 -- see DiscGeometry for why a
+        // stick gets the wider sectors.
+        val direction = DiscGeometry.discDirection8(x, y, 1f)
         if (direction != lastDirection) {
             lastDirection = direction
             onDisc(direction)
