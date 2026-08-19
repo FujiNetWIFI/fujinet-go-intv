@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.2
+
+### Fixed
+- **Cartridge boots no longer stall partway through with a frozen progress
+  bar.** Loading a cart from FujiNet could stop dead mid-transfer, leaving the
+  console on the "BOOTING / DO NOT POWER OFF" screen with the bar stuck and the
+  title line drawn as garbage. Whether a title was affected came down to its own
+  data, so it looked arbitrary: roughly half the 32K Intellivision-era carts hung
+  every single time while the rest loaded fine. The emulator's receive buffer was
+  sized for the FujiNet mailbox's replies rather than for the much larger frames
+  a cartridge push arrives in, so a block of graphics data that happened to
+  encode badly overran it -- and the connection could never recover afterwards,
+  which is why the bar froze instead of reporting a failure. The buffer is now
+  sized for what it actually carries, and a malformed frame is discarded and
+  resynchronized rather than wedging the link. Picked up from the rebuilt jzIntv
+  core (`tools/jzintv/build-jzintv-core.sh --refresh`).
+
 ## 1.0.1
 
 ### Fixed
