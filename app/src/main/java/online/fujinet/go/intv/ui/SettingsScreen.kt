@@ -84,11 +84,21 @@ fun SettingsScreen(
     val cartPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         val file = MediaImport.importCartridge(context, uri)
-        if (file != null) {
-            cartName = file.name
-            cartPath = file.absolutePath
-        } else {
-            Toast.makeText(context, "Expected a .rom/.bin/.int/.cfg file", Toast.LENGTH_SHORT).show()
+        when {
+            file == null ->
+                Toast.makeText(context, "Expected a .rom/.bin/.int/.cfg file", Toast.LENGTH_SHORT).show()
+            // Keep the sidecar, but never boot it: a .cfg as the cart path
+            // takes the whole process down (see MediaImport.isMemoryMap).
+            MediaImport.isMemoryMap(file) ->
+                Toast.makeText(
+                    context,
+                    "Saved ${file.name} as a memory map -- now pick the matching .bin as the cartridge",
+                    Toast.LENGTH_LONG,
+                ).show()
+            else -> {
+                cartName = file.name
+                cartPath = file.absolutePath
+            }
         }
     }
 

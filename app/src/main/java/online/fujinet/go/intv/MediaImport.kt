@@ -68,6 +68,8 @@ object MediaImport {
      * jzIntv's default memory map unless a same-basename .cfg sits beside
      * it -- callers importing a .cfg should name it to match an already-
      * imported cartridge.
+     *
+     * A returned .cfg is *not* a cartridge: see [isMemoryMap].
      */
     fun importCartridge(context: Context, uri: Uri): File? {
         val name = displayName(context, uri) ?: return null
@@ -76,6 +78,16 @@ object MediaImport {
         val dest = File(RomStore.cartsDir(context), name)
         return copyTo(context, uri, dest)
     }
+
+    /**
+     * True when [file] is a memory-map sidecar rather than a bootable image.
+     *
+     * A .cfg must never be handed to the emulator as the cartridge: jzIntv
+     * takes the cart path as its trailing positional argument, finds no
+     * companion ROM for a bare .cfg, and calls exit(1) -- which on Android is
+     * a silent process kill with no crash dialog and nothing in the log.
+     */
+    fun isMemoryMap(file: File): Boolean = file.extension.equals("cfg", ignoreCase = true)
 
     private fun crc32Of(file: File): Long {
         val crc = java.util.zip.CRC32()

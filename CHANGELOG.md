@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **`.bin`/`.cfg` cartridge pairs now load correctly from the SD host slot.**
+  The web UI file manager stored only the *first* file of an upload and
+  reported success, so sending a cartridge and its `.cfg` memory map together
+  left the card holding the `.bin` alone. The emulator then booted it against
+  its size-guess map, which for most titles means a black screen, garbage or a
+  hang -- with nothing anywhere saying the map was missing. Uploads now accept
+  and store every selected file (drag-and-drop included) and name each one in
+  the result. Requires the rebuilt FujiNet runtime
+  (`tools/fujinet/build-fujinet.sh`).
+- The Settings cartridge picker no longer sets a bare `.cfg` as the cartridge.
+  jzIntv takes the cart path as its trailing positional argument and calls
+  `exit(1)` when it is a `.cfg` with no companion ROM -- a silent process kill
+  on Android. The sidecar is still imported, with a message pointing at the
+  matching `.bin`.
+
+### Changed
+- FujiNet runtime logging says what the `.cfg` sibling probe did: `file_exists`
+  reports found/not found rather than just the path it tried, and a ROM that
+  mounts without a sibling now says so and names the path it looked for. Both
+  land in `<filesDir>/intv/fujinet/fujinet-console.log`.
+
 ## 1.0.0
 
 Google Play readiness release. No emulation changes.

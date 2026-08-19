@@ -1,5 +1,6 @@
 package online.fujinet.go.intv
 
+import java.io.File
 import online.fujinet.go.intv.input.Intv
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -39,6 +40,16 @@ class MediaImportClassifyTest {
             MediaImport.RomImportResult.WrongSize(4096L),
             MediaImport.classify(4096L, Intv.EXEC_CRC32),
         )
+    }
+
+    @Test
+    fun memoryMapSidecarsAreNotBootableCartridges() {
+        // A .cfg handed to jzIntv as the cart path exits the process, so the
+        // picker has to tell the two apart -- whatever case the name carries.
+        assertEquals(true, MediaImport.isMemoryMap(File("/carts/Pole Position.cfg")))
+        assertEquals(true, MediaImport.isMemoryMap(File("/carts/POLE POSITION.CFG")))
+        assertEquals(false, MediaImport.isMemoryMap(File("/carts/Pole Position.bin")))
+        assertEquals(false, MediaImport.isMemoryMap(File("/carts/config.rom")))
     }
 
     @Test
