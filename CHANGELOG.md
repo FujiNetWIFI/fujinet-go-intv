@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.1
 
 ### Fixed
 - **`.bin`/`.cfg` cartridge pairs now load correctly from the SD host slot.**
