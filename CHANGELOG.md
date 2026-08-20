@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.3
+
+### Fixed
+- **Larger cartridges loaded from FujiNet no longer come up corrupted.** The
+  transfer completed and the game started, but its graphics and code were
+  subtly wrong -- most of the 32K and 48K Intellivision-era titles were
+  affected (Deep Pockets, Body Slam, Spiker, Pole Position and the rest),
+  since nearly all of them share the same memory layout. When a pushed
+  cartridge replaced the FujiNet boot menu, the boot menu's own memory stayed
+  mapped alongside the new game's rather than being released, and the console
+  read both at once; where the two overlapped, half of every value the game
+  read was quietly lost. The outgoing cartridge is now unmapped before the new
+  one takes its place. Picked up from the rebuilt jzIntv core
+  (`tools/jzintv/build-jzintv-core.sh --refresh`); the desktop repo remains the
+  single source of truth for `jzintv-fujinet.patch`.
+
 ## 1.0.2
 
 ### Fixed
