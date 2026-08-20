@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.4
+
+### Fixed
+- **Cartridges that refused to load from FujiNet with "TRUNCATED XFER" now
+  boot.** The larger homebrew titles were affected -- Cloudfire, frantic 4 and
+  Pacmanthology among them. They describe their memory layout in far more
+  detail than an original Intellivision cartridge does, use bank switching to
+  reach past the console's address space, and add the JLP expansion for extra
+  memory and save games. The loader that handled cartridges arriving over
+  FujiNet was a simplified one and understood none of that: it gave up past the
+  sixteenth layout line, ignored the bank-switching notation entirely, and
+  never looked at the JLP settings. Cartridges pushed over FujiNet now go
+  through the emulator's own cartridge loader -- the same one used when you
+  open a game from storage -- so a game pushed from FujiNet and the same game
+  opened locally behave identically. JLP save games are kept per title and
+  survive between sessions. Picked up from the rebuilt jzIntv core
+  (`tools/jzintv/build-jzintv-core.sh --refresh`); the desktop repo remains the
+  single source of truth for `jzintv-fujinet.patch`.
+
 ## 1.0.3
 
 ### Fixed
