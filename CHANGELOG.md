@@ -3,6 +3,13 @@
 ## 1.0.4
 
 ### Fixed
+- **The boot progress bar now tracks the actual transfer.** It measured
+  against a fixed guess rather than the cartridge's real size, so a small
+  cartridge crawled part-way across the bar and then jumped to the end, while
+  a large one filled the bar within the first few seconds and sat there for
+  the rest of the transfer. FujiNet has been sending the real size for a
+  while; the emulator had never been taught to read it.
+
 - **Cartridges that refused to load from FujiNet with "TRUNCATED XFER" now
   boot.** The larger homebrew titles were affected -- Cloudfire, frantic 4 and
   Pacmanthology among them. They describe their memory layout in far more
