@@ -100,6 +100,8 @@ else
     cp "${INTV_DESKTOP_SRC}/core/src/session.c" \
        "${INTV_DESKTOP_SRC}/core/src/settings.c" \
        "${INTV_DESKTOP_SRC}/core/src/intv_keymap.c" \
+       "${INTV_DESKTOP_SRC}/core/src/bindings.c" \
+       "${INTV_DESKTOP_SRC}/core/src/bindings.h" \
        "${INTV_DESKTOP_SRC}/core/src/session_internal.h" \
        "${INTV_DESKTOP_SRC}/core/src/compat.h" \
        "${INTV_DESKTOP_SRC}/core/src/roms_embedded.h" \

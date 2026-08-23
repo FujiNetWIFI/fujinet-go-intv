@@ -218,6 +218,7 @@ add_library(intvcore SHARED
     "${GEN}/src/session.c"
     "${GEN}/src/settings.c"
     "${GEN}/src/intv_keymap.c"
+    "${GEN}/src/bindings.c"
 )
 target_include_directories(intvcore PRIVATE "${GEN}/src" "${GEN}/include" "${GEN}/jzintv")
 target_compile_options(intvcore PRIVATE -Wall -Wextra -Wno-unused-parameter)

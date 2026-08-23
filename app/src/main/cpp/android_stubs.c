@@ -14,7 +14,11 @@
  * Gamepads: Android's InputDevice/MotionEvent APIs are read entirely in
  * Kotlin (input/GameControllerMapper.kt), which calls the same
  * nativePadDisc/nativePadKey JNI entry points a touch controller uses --
- * there is no native gamepad polling thread to start/stop.
+ * there is no native gamepad polling thread to start/stop, and likewise no
+ * cached per-pad disc state for intv_gamepad_forget_disc to invalidate: the
+ * desktop's copy exists only so gamepad_sdl.c's polling loop re-sends a
+ * direction it would otherwise suppress as unchanged, and nothing on this
+ * side does that suppression.
  *
  * Copyright (C) 2026 Thomas Cherryhomes
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -41,5 +45,9 @@ int intv_gamepad_start(void)
 }
 
 void intv_gamepad_stop(void)
+{
+}
+
+void intv_gamepad_forget_disc(void)
 {
 }
