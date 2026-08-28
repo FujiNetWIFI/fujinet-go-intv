@@ -20,6 +20,37 @@
   interface the toolbar button did; only the way in has changed, to free the
   toolbar slot for RESET.
 
+## 1.0.6
+
+### Fixed
+- **Moving the selection bar in the FujiNet CONFIG menu no longer makes the
+  screen flicker.** Every screen with a selection bar -- host slots, the WiFi
+  network list, the file browser -- repainted its whole list each time the bar
+  moved, and the console cannot redraw that much within a single frame, so the
+  list was scanned out half-finished for several frames running. The WiFi list
+  was the worst of them: it asked FujiNet for every network again just to move
+  the bar one row. The file browser additionally shifted the colours of
+  everything below the bar for a moment as it redrew. Moving the bar now
+  recolours only the two rows that actually change, and disc wobble near a
+  diagonal no longer retriggers the redraw every other frame.
+- The character-grid cursor no longer redraws itself while it is stationary,
+  and the boot progress bar no longer blanks its percentage before reprinting
+  it. Only the CONFIG program embedded in the emulator core changed
+  (`fujinet-config` 49ce329, via `fujinet-go-intv-desktop` 271b3fc).
+
+## 1.0.5
+
+### Changed
+- **The FujiNet CONFIG menu is now in colour.** Every screen has its own
+  palette rather than white text on black: host slots, the network info screen,
+  the file browser, the on-screen keyboard used for host names and WiFi
+  passwords, and the boot screen. The file browser now marks each entry with
+  its type -- a folder icon for directories, a cartridge icon for `.rom` and
+  `.bin` files -- and the on-screen keyboard highlights the selected key in
+  inverse video rather than by changing its colour. Nothing about how the app
+  works has changed; this release only refreshes the CONFIG program embedded in
+  the emulator core.
+
 ## 1.0.4
 
 ### Fixed
