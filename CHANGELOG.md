@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.7
+
+### Added
+- **A RESET button on the toolbar, where the FujiNet button used to be.** It is
+  the console's own front-panel RESET, and it does two things depending on how
+  you press it. **Tap** it and the cartridge you are playing restarts in place
+  -- including one pushed over FujiNet, which restarts as itself rather than
+  dropping you back to the config menu. Anything you were holding down at that
+  moment is released first, so nothing stays stuck. **Press and hold** it and
+  the cartridge is ejected and the machine reboots into the FujiNet config
+  menu. That hold is the only way back to config once a cartridge with its own
+  memory map has been running, since such a cartridge switches the FujiNet
+  connection off for the rest of the session and only a restart brings it back.
+
+### Changed
+- **The FujiNet configuration screen has moved into Settings.** It is the first
+  entry in the dialog, as **FujiNet Configuration**. It opens the same web
+  interface the toolbar button did; only the way in has changed, to free the
+  toolbar slot for RESET.
+
 ## 1.0.4
 
 ### Fixed

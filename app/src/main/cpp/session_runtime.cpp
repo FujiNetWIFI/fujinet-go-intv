@@ -295,8 +295,10 @@ void SessionRuntime::PresentTo(ANativeWindow* w, const uint32_t* xrgb8888,
 }
 
 void SessionRuntime::RequestReset() {
-    // jzIntv has no in-place reset entry point analogous to msxhost's --
-    // exposing this as stop+start on the current cart is left for a later
-    // milestone (see EmulatorNative.kt's own comment); intentionally a
-    // no-op for now rather than a partial implementation.
+    // Delegates rather than calling intv_host_reset() directly, even though
+    // this file already includes intv_host.h for the frame hooks:
+    // intv_host_android owns everything that talks to intvsession_* (see its
+    // header comment), and the session-level call is the one that also tells
+    // the gamepad layer to forget a disc held across the reset.
+    intv_host_android::ResetGame();
 }

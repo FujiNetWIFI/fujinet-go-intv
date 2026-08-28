@@ -73,6 +73,14 @@ bool HasEcsRom(const std::string& roms_dir);
 bool LoadCart(const std::string& path);
 std::string CartPath();
 
+// Console-level RESET of the running cartridge, in place -- what the front
+// switch does on a real Intellivision. Releases every held pad/ECS input and
+// clears the audio ring, then arms jzIntv's own one-shot reset for its next
+// iteration (intvsession_reset_game). Does not touch which cart is mapped, so
+// a cartridge pushed live over FujiNet restarts as itself rather than dropping
+// back to the config ROM, and does not block. No-op if nothing is running.
+void ResetGame();
+
 // FujiNet accessors, pass-through to intvsession_fujinet_*.
 bool FujiNetRunning();
 std::string FujiNetWebUiUrl();

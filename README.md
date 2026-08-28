@@ -43,6 +43,19 @@ disc (snapped to the 8 compass positions, matching the desktop's own keypad
 window), the 12-key keypad, and the three side action buttons. A third
 overlay, reachable when ECS is enabled, is an on-screen ECS keyboard.
 
+## Reset
+
+The control bar's **↻** button is the console's front-panel RESET, and it does
+two things:
+
+- **Tap** — soft-resets the running cartridge in place. Held inputs are
+  released first, and the cartridge stays mapped, so one pushed over FujiNet
+  restarts as itself.
+- **Press and hold** — ejects the cartridge and reboots into the FujiNet config
+  ROM. This is the only way back to config once a cartridge's `.cfg` memory map
+  has disabled the FujiNet mailbox for the session, since that only clears on
+  restart.
+
 ## Architecture
 
 | Concern | Component |
@@ -52,7 +65,7 @@ overlay, reachable when ECS is enabled, is an on-screen ECS keyboard.
 | Android host | `app/src/main/cpp/session_runtime.cpp` (presenter thread over `ANativeWindow`, `AudioTrack`-pulled audio, ADPF performance hints) |
 | FujiNet runtime | `libfujinet.so`, `dlopen`'d in-process |
 | Transport | FujiBusPacket-over-BoIP, TCP 65503 (FujiNet listens, jzIntv connects) |
-| FujiNet web UI | served on `0.0.0.0:8057`; the **FujiNet** tab opens `http://127.0.0.1:8057/` |
+| FujiNet web UI | served on `0.0.0.0:8057`; **Settings → FujiNet Configuration** opens `http://127.0.0.1:8057/` |
 | UI | Jetpack Compose (emulator surface, controller pad, ECS keyboard, settings, FujiNet WebUI) |
 
 ## Sources

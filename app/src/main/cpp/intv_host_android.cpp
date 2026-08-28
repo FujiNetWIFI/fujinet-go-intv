@@ -182,6 +182,12 @@ bool LoadCart(const std::string& path) {
     return intvsession_load_cart(g_session, path.c_str()) == 0;
 }
 
+void ResetGame() {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    if (!g_session) return;
+    intvsession_reset_game(g_session);
+}
+
 std::string CartPath() {
     std::lock_guard<std::mutex> lock(g_mutex);
     if (!g_session) return "";

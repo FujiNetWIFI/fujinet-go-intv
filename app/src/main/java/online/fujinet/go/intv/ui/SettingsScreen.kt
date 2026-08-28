@@ -3,16 +3,20 @@ package online.fujinet.go.intv.ui
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
@@ -25,27 +29,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import online.fujinet.go.intv.MediaImport
+import online.fujinet.go.intv.R
 import online.fujinet.go.intv.SessionController
 import online.fujinet.go.intv.settings.HwMode
 import online.fujinet.go.intv.settings.RomStore
 import online.fujinet.go.intv.settings.VideoStandard
 
 /**
- * Settings: ECS / Intellivoice (tri-state Auto/Off/On, matching jzIntv's own
- * cart-metadata-driven default -- see MachineSettingsStore's own comment on
- * why this is not collapsed to a two-state switch), NTSC/PAL (radio toggle),
- * cartridge selection, system-ROM status/import, and haptics. Presented as a
- * centered dialog over the running emulator, like the rest of the family.
- * "Apply & Restart" persists every restart-requiring option and reboots the
- * session (jzIntv is a process-wide singleton -- see session_runtime.cpp);
- * haptics apply live regardless.
+ * Settings: the FujiNet web admin, ECS / Intellivoice (tri-state Auto/Off/On,
+ * matching jzIntv's own cart-metadata-driven default -- see
+ * MachineSettingsStore's own comment on why this is not collapsed to a
+ * two-state switch), NTSC/PAL (radio toggle), cartridge selection,
+ * system-ROM status/import, and haptics. Presented as a centered dialog over
+ * the running emulator, like the rest of the family. "Apply & Restart"
+ * persists every restart-requiring option and reboots the session (jzIntv is
+ * a process-wide singleton -- see session_runtime.cpp); haptics apply live
+ * regardless.
  */
 @Composable
 fun SettingsScreen(
     onApplyRestart: () -> Unit,
+    onOpenFujiNet: () -> Unit,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -121,6 +131,26 @@ fun SettingsScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                Text("FujiNet", style = MaterialTheme.typography.titleSmall)
+                TextButton(onClick = onOpenFujiNet) {
+                    // The FujiNet "dot" logo. Modulate recolours only the
+                    // white tile, keeping the black centre dot black and the
+                    // corners transparent. Tinted to the button's own content
+                    // colour rather than the toolbar's IntvGreen: that green
+                    // is picked to sit on the black emulator background, and
+                    // against the dialog's surface it all but disappears --
+                    // in either scheme.
+                    Image(
+                        painter = painterResource(R.drawable.fujinet_toolbar),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        colorFilter = ColorFilter.tint(LocalContentColor.current, BlendMode.Modulate),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text("FujiNet Configuration…")
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Text("ECS", style = MaterialTheme.typography.titleSmall)
                 HwMode.entries.forEach { mode ->
                     val disabled = mode != HwMode.OFF && !ecsRomPresent

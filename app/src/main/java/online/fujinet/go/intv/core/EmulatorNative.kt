@@ -45,6 +45,13 @@ object EmulatorNative {
 
     external fun nativeAttachSurface(surface: Surface)
     external fun nativeDetachSurface()
+
+    /**
+     * Soft-resets the machine in place (intvsession_reset_game): held pad/ECS
+     * inputs are released and the audio ring cleared synchronously, then
+     * jzIntv's own one-shot reset is armed for its next loop iteration. Which
+     * cartridge is mapped is untouched, and this does not block.
+     */
     external fun nativeRequestReset()
 
     /** Exact-size probes; no session/ROM directory creation required. */

@@ -94,7 +94,27 @@ class SessionController private constructor(private val context: Context) {
 
     fun attachSurface(surface: Surface) = EmulatorNative.nativeAttachSurface(surface)
     fun detachSurface() = EmulatorNative.nativeDetachSurface()
-    fun reset() = EmulatorNative.nativeRequestReset()
+
+    /**
+     * The console RESET switch: soft-resets the running cartridge in place,
+     * releasing every held input first. The cart stays mapped -- one pushed
+     * live over FujiNet restarts as itself rather than dropping back to the
+     * config ROM -- and this does not block, so it is safe from the UI thread.
+     */
+    fun resetGame() = EmulatorNative.nativeRequestReset()
+
+    /**
+     * Back to the embedded FujiNet config ROM: ejects the persisted cartridge
+     * and restarts. Unlike [resetGame] this is a full stop+start, which is
+     * also what re-enables the FujiNet mailbox that a cartridge's .cfg memory
+     * map had disabled for the session (that only clears on restart -- see
+     * intvsession.h's intvsession_reset_to_config). [restart] threads off the
+     * caller, so this is safe from the UI thread too.
+     */
+    fun resetToConfig() {
+        settings.ejectCart()
+        restart()
+    }
 
     val fujiNetWebUiUrl: String get() = EmulatorNative.nativeFujiNetWebUiUrl()
     val fujiNetRunning: Boolean get() = EmulatorNative.nativeFujiNetRunning()

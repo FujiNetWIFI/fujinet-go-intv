@@ -19,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
-import online.fujinet.go.intv.fujinet.FujiNetWebViewActivity
 import online.fujinet.go.intv.input.GameControllerMapper
 import online.fujinet.go.intv.input.IntvKeyMapper
 import online.fujinet.go.intv.input.Intv
@@ -31,9 +30,15 @@ import online.fujinet.go.intv.ui.theme.FujiNetGoIntvTheme
  * controller (disc + keypad + action buttons) and a control bar. The native
  * layer (jzIntv + the in-process FujiNet runtime over FujiBusPacket-over-
  * BoIP) is owned by [EmulatorSessionService] (a foreground service) so it
- * keeps running across activity changes (e.g. the FujiNet web admin) and
- * while backgrounded. The session itself is a process singleton; the Power
- * button stops both.
+ * keeps running across activity changes (e.g. the FujiNet web admin, reached
+ * from Settings) and while backgrounded. The session itself is a process
+ * singleton; the Power button stops both.
+ *
+ * The control bar's reset button is the console's front-panel RESET on a tap
+ * (in-place soft reset, cart left mapped) and the way back to the FujiNet
+ * config ROM on a press-and-hold -- see [SessionController.resetGame] and
+ * [SessionController.resetToConfig] for why those are two different
+ * mechanisms rather than one with a flag.
  */
 class MainActivity : ComponentActivity() {
 
@@ -75,7 +80,8 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.Black) {
                     EmulatorScreen(
                         session = session,
-                        onOpenFujiNet = ::openFujiNet,
+                        onResetGame = { session.resetGame() },
+                        onResetToConfig = { session.resetToConfig() },
                         onOpenSettings = ::openSettings,
                         onShutdown = ::shutdown,
                         modifier = Modifier.safeDrawingPadding(),
@@ -99,10 +105,6 @@ class MainActivity : ComponentActivity() {
         // emulated ECS matrix -- see SessionController.ecsKeysClear's own
         // comment.
         if (::session.isInitialized) session.ecsKeysClear()
-    }
-
-    private fun openFujiNet() {
-        startActivity(Intent(this, FujiNetWebViewActivity::class.java))
     }
 
     private fun openSettings() {
