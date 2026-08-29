@@ -9,8 +9,13 @@
 #   * Source is the user's LOCAL fujinet-firmware checkout (not a target-
 #     specific fork) -- fujinet-go-intv-desktop's own FujiNet build
 #     (cmake/FujiNetRuntime.cmake) also builds from third_party/fujinet-
-#     firmware, pinned at commit a0991d7bd176ba8aa833b869571e328749d964be --
-#     so this is the same source tree, not a different one.
+#     firmware, pinned at commit cd7c0eb9a543845a3b934bc52663eeedc4656f92
+#     (the add-google-calendar branch) -- so this is the same source tree,
+#     not a different one. Note the asymmetry: the desktop pins a commit and
+#     this script takes whatever the checkout is on, so the two agree only
+#     when the local checkout sits on that pin. Keep this comment moving with
+#     FUJINET_COMMIT in the desktop's cmake/Dependencies.cmake; it is the only
+#     record here of which firmware a build was cut from.
 #   * The PC build targets RS232 (build.sh -cp RS232), the same target the
 #     desktop app uses: jzIntv's fujibus device (src/fujinet/fn_sock.c in the
 #     staged jzIntv tree, patched in by jzintv-fujinet.patch) rides a

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.8
+
+### Added
+- **The built-in FujiNet gains calendars.** The bundled runtime is rebuilt from
+  fujinet-firmware's `add-google-calendar` branch (`cd7c0eb9`), which adds the
+  `CALENDAR`, `GCAL` (Google Calendar) and `ICAL` (iCalendar over HTTP) network
+  protocols. A program running on the emulated Intellivision can now open one
+  of those URLs and read events back as plain text, the same way it already
+  opens `GDRIVE:` and `GMAIL:`. Nothing in the app's own UI changed; this is
+  the network device gaining a new protocol.
+
 ## 1.0.7
 
 ### Added
