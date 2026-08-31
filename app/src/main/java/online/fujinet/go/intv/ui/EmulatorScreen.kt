@@ -125,7 +125,6 @@ fun EmulatorScreen(
                     setOverlay(if (overlay == Overlay.ECS_KEYBOARD) Overlay.NONE else Overlay.ECS_KEYBOARD)
                 }
             },
-            hapticsEnabled = haptics,
             onResetGame = onResetGame,
             onResetToConfig = onResetToConfig,
             onOpenSettings = onOpenSettings,
@@ -149,7 +148,7 @@ fun EmulatorScreen(
                     modifier = Modifier.align(Alignment.CenterVertically).padding(horizontal = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    IntvKeypad(session, controllerSide)
+                    IntvKeypad(session, controllerSide, haptics)
                     androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
                     IntvActions(session, controllerSide, haptics)
                 }
@@ -188,7 +187,6 @@ private fun ControlBar(
     controllerActive: Boolean,
     ecsActive: Boolean,
     ecsAvailable: Boolean,
-    hapticsEnabled: Boolean,
     onToggleController: () -> Unit,
     onToggleEcs: () -> Unit,
     onResetGame: () -> Unit,
@@ -197,7 +195,11 @@ private fun ControlBar(
     onShutdown: () -> Unit,
 ) {
     val context = LocalContext.current
+    // A heavier pulse than the toolbar's own taps, but still the toolbar, so
+    // it answers to the Interface-haptics preference rather than the
+    // controller one.
     val haptic = rememberFujiHaptic(FujiHapticPattern.KeyPress)
+    val uiHapticsOn = LocalUiHapticsEnabled.current
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
@@ -218,7 +220,7 @@ private fun ControlBar(
             // the screen for as long as the restart takes: without the pulse
             // and the toast it reads as a tap that didn't register.
             onLongClick = {
-                if (hapticsEnabled) haptic()
+                if (uiHapticsOn) haptic()
                 Toast.makeText(context, "Resetting to FujiNet config…", Toast.LENGTH_SHORT).show()
                 onResetToConfig()
             },
@@ -252,9 +254,10 @@ private fun BarButton(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val blip = LocalUiHaptic.current
     if (onLongClick == null) {
         TextButton(
-            onClick = onClick,
+            onClick = { blip(); onClick() },
             modifier = modifier,
             enabled = enabled,
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
@@ -275,7 +278,7 @@ private fun BarButton(
             .combinedClickable(
                 enabled = enabled,
                 role = Role.Button,
-                onClick = onClick,
+                onClick = { blip(); onClick() },
                 onLongClick = onLongClick,
             )
             .padding(horizontal = 4.dp, vertical = 8.dp),

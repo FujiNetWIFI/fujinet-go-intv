@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.9
+
+### Added
+- **Every on-screen control now answers with a tactile blip.** Until now only
+  the disc, the action buttons and the ECS keyboard pulsed under a fingertip.
+  **The Master Component keypad was silent on all twelve keys** -- the largest
+  gap -- and so were the toolbar, everything in Settings, the P1/P2 player
+  selector and the ROM-import gate. All of them now give the same short
+  confirmation.
+- **A third haptics switch, "Interface haptics", in Settings.** It governs the
+  app's own controls only -- toolbar, Settings, the player selector -- so they
+  can be silenced without giving up the pulse under the keypad and disc, or the
+  other way round. It is on by default, and its pulse is deliberately lighter
+  than a keypress: tapping Settings is incidental, pressing a key is the point.
+
+### Fixed
+- The toolbar's RESET button gave no feedback on a tap, only on a press-and-hold.
+- An ECS key driven from a D-pad or TV remote (the OK button) pulsed on release
+  but not on the press itself, unlike the same key under a fingertip.
+
 ## 1.0.8
 
 ### Added

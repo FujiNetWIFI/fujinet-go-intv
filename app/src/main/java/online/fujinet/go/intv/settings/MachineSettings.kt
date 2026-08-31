@@ -71,6 +71,12 @@ class MachineSettingsStore(context: Context) {
         get() = prefs.getBoolean(KEY_HAPTICS, true)
         set(value) = prefs.edit().putBoolean(KEY_HAPTICS, value).apply()
 
+    /** The app's own controls (toolbar, Settings, the ROM gate), kept separate
+     * from the controller pulse so either can be silenced on its own. */
+    var interfaceHapticsEnabled: Boolean
+        get() = prefs.getBoolean(KEY_UI_HAPTICS, true)
+        set(value) = prefs.edit().putBoolean(KEY_UI_HAPTICS, value).apply()
+
     private companion object {
         const val PREFS_NAME = "fujiintv"
         const val KEY_ECS = "ecs"
@@ -79,5 +85,6 @@ class MachineSettingsStore(context: Context) {
         const val KEY_CART_PATH = "cart_path"
         const val KEY_CART_NAME = "cart_name"
         const val KEY_HAPTICS = "haptics"
+        const val KEY_UI_HAPTICS = "interfaceHaptics"
     }
 }

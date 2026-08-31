@@ -190,7 +190,7 @@ private fun RowScope.KeyBox(
             .background(container)
             .then(if (focused) Modifier.border(3.dp, Color.White, shape) else Modifier)
             .focusable(interactionSource = interaction)
-            .onKeyEvent { ev -> handleOkKey(ev, onPress, onRelease) }
+            .onKeyEvent { ev -> handleOkKey(ev, { haptic(); onPress() }, onRelease) }
             .pointerInput(key) {
                 detectTapGestures(onPress = {
                     haptic()

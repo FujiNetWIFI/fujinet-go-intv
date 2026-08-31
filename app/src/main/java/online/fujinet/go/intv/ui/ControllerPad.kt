@@ -77,7 +77,7 @@ fun IntvController(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IntvDisc(session, side, hapticsEnabled)
-            IntvKeypad(session, side)
+            IntvKeypad(session, side, hapticsEnabled)
         }
         Spacer(Modifier.height(8.dp))
         IntvActions(session, side, hapticsEnabled)
@@ -227,9 +227,12 @@ fun IntvDisc(
 fun IntvKeypad(
     session: SessionController,
     side: Int,
+    hapticsEnabled: Boolean,
     modifier: Modifier = Modifier,
     keySize: Dp = 44.dp,
 ) {
+    val emit = rememberFujiHaptic(FujiHapticPattern.KeyPress)
+    val onHaptic = { if (hapticsEnabled) emit() }
     val rows = listOf(
         listOf(Intv.KEY_1 to "1", Intv.KEY_2 to "2", Intv.KEY_3 to "3"),
         listOf(Intv.KEY_4 to "4", Intv.KEY_5 to "5", Intv.KEY_6 to "6"),
@@ -240,7 +243,7 @@ fun IntvKeypad(
         for (row in rows) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 for ((key, label) in row) {
-                    KeypadKey(label, keySize) { pressed -> session.padKey(side, key, pressed) }
+                    KeypadKey(label, keySize, onHaptic) { pressed -> session.padKey(side, key, pressed) }
                 }
             }
         }
@@ -248,9 +251,10 @@ fun IntvKeypad(
 }
 
 @Composable
-private fun KeypadKey(label: String, size: Dp, onHold: (Boolean) -> Unit) {
+private fun KeypadKey(label: String, size: Dp, onHaptic: () -> Unit, onHold: (Boolean) -> Unit) {
     var held by remember { mutableStateOf(false) }
     val currentHold = rememberUpdatedState(onHold)
+    val currentHaptic = rememberUpdatedState(onHaptic)
     Box(
         modifier = Modifier
             .size(size)
@@ -262,6 +266,7 @@ private fun KeypadKey(label: String, size: Dp, onHold: (Boolean) -> Unit) {
             .pointerInput(Unit) {
                 detectTapGestures(onPress = {
                     held = true
+                    currentHaptic.value()
                     currentHold.value(true)
                     try {
                         awaitRelease()
@@ -358,6 +363,7 @@ fun IntvSideSelector(
     } else {
         listOf(Intv.PAD_LEFT to "P1", Intv.PAD_RIGHT to "P2")
     }
+    val blip = LocalUiHaptic.current
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(50))
@@ -370,7 +376,7 @@ fun IntvSideSelector(
                 style = MaterialTheme.typography.labelMedium,
                 color = if (selected) IntvGreen else Color(0xFFE8F2E4),
                 modifier = Modifier
-                    .pointerInput(value) { detectTapGestures(onTap = { onSideChange(value) }) }
+                    .pointerInput(value) { detectTapGestures(onTap = { blip(); onSideChange(value) }) }
                     .background(if (selected) SticYellow else Color.Transparent)
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             )

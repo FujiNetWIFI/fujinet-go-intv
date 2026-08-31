@@ -108,7 +108,8 @@ fun RomGate(onImported: () -> Unit, modifier: Modifier = Modifier) {
                 )
             }
         }
-        Button(onClick = { picker.launch(arrayOf("*/*")) }) {
+        val blip = LocalUiHaptic.current
+        Button(onClick = { blip(); picker.launch(arrayOf("*/*")) }) {
             Text("Import ROMs…")
         }
     }

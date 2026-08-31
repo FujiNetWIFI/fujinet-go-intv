@@ -66,6 +66,7 @@ fun SettingsScreen(
     var ivoice by remember { mutableStateOf(settings.ivoice) }
     var video by remember { mutableStateOf(settings.video) }
     var haptics by remember { mutableStateOf(session.keyboardHapticsEnabled) }
+    var uiHaptics by remember { mutableStateOf(session.interfaceHapticsEnabled) }
     var cartName by remember { mutableStateOf(settings.cartName) }
     var cartPath by remember { mutableStateOf(settings.cartPath) }
     var romStatus by remember { mutableStateOf(RomStore.status(context)) }
@@ -112,10 +113,16 @@ fun SettingsScreen(
         }
     }
 
+    // Re-provided from this screen's own live state (the outer provider was
+    // installed from the Activity), so switching Interface haptics off goes
+    // quiet on the next tap rather than on the next launch.
+    ProvideUiHaptics(enabled = uiHaptics) {
+    val blip = LocalUiHaptic.current
     AlertDialog(
         onDismissRequest = onClose,
         confirmButton = {
             TextButton(onClick = {
+                blip()
                 settings.ecs = ecs
                 settings.ivoice = ivoice
                 settings.video = video
@@ -124,7 +131,7 @@ fun SettingsScreen(
                 onApplyRestart()
             }) { Text("Apply & Restart") }
         },
-        dismissButton = { TextButton(onClick = onClose) { Text("Close") } },
+        dismissButton = { TextButton(onClick = { blip(); onClose() }) { Text("Close") } },
         title = { Text("FujiNet Go Intv — Settings") },
         text = {
             Column(
@@ -132,7 +139,7 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text("FujiNet", style = MaterialTheme.typography.titleSmall)
-                TextButton(onClick = onOpenFujiNet) {
+                TextButton(onClick = { blip(); onOpenFujiNet() }) {
                     // The FujiNet "dot" logo. Modulate recolours only the
                     // white tile, keeping the black centre dot black and the
                     // corners transparent. Tinted to the button's own content
@@ -183,9 +190,9 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { cartPicker.launch(arrayOf("*/*")) }) { Text("Change…") }
+                    TextButton(onClick = { blip(); cartPicker.launch(arrayOf("*/*")) }) { Text("Change…") }
                     if (cartPath.isNotEmpty()) {
-                        TextButton(onClick = { cartName = ""; cartPath = "" }) { Text("Eject") }
+                        TextButton(onClick = { blip(); cartName = ""; cartPath = "" }) { Text("Eject") }
                     }
                 }
                 Text(
@@ -201,7 +208,7 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-                TextButton(onClick = { romPicker.launch(arrayOf("*/*")) }) { Text("Import…") }
+                TextButton(onClick = { blip(); romPicker.launch(arrayOf("*/*")) }) { Text("Import…") }
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Text("Haptics", style = MaterialTheme.typography.titleSmall)
@@ -209,32 +216,42 @@ fun SettingsScreen(
                     haptics = it
                     session.keyboardHapticsEnabled = it
                 }
+                ToggleRow("Interface haptics", uiHaptics) {
+                    uiHaptics = it
+                    session.interfaceHapticsEnabled = it
+                }
             }
         },
     )
+    }
 }
 
 @Composable
 private fun RadioRow(label: String, selected: Boolean, enabled: Boolean = true, onSelect: () -> Unit) {
+    // The row and the RadioButton are both click targets, but only one of them
+    // consumes a given tap, so wrapping the shared callback blips exactly once.
+    val blip = LocalUiHaptic.current
+    val select = { blip(); onSelect() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .selectable(selected = selected, enabled = enabled, onClick = onSelect),
+            .selectable(selected = selected, enabled = enabled, onClick = select),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RadioButton(selected = selected, enabled = enabled, onClick = onSelect)
+        RadioButton(selected = selected, enabled = enabled, onClick = select)
         Text(label)
     }
 }
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    val blip = LocalUiHaptic.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label)
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = { blip(); onCheckedChange(it) })
     }
 }

@@ -16,6 +16,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
@@ -23,6 +26,7 @@ import online.fujinet.go.intv.input.GameControllerMapper
 import online.fujinet.go.intv.input.IntvKeyMapper
 import online.fujinet.go.intv.input.Intv
 import online.fujinet.go.intv.ui.EmulatorScreen
+import online.fujinet.go.intv.ui.ProvideUiHaptics
 import online.fujinet.go.intv.ui.theme.FujiNetGoIntvTheme
 
 /**
@@ -57,6 +61,11 @@ class MainActivity : ComponentActivity() {
     private val requestNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* best effort */ }
 
+    /** Interface haptics are toggled in the separate SettingsActivity, so
+     * re-read the preference on resume the way EmulatorScreen does for the
+     * controller pulse. */
+    private var uiHaptics by mutableStateOf(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (intent?.action == EmulatorSessionService.ACTION_SHUTDOWN) {
@@ -71,12 +80,17 @@ class MainActivity : ComponentActivity() {
         // complementary per-thread hint.
         window.setSustainedPerformanceMode(true)
         session = SessionController.get(applicationContext)
+        uiHaptics = session.interfaceHapticsEnabled
 
         maybeRequestNotificationPermission()
         EmulatorSessionService.start(this)
 
         setContent {
             FujiNetGoIntvTheme {
+                // Provided here rather than inside EmulatorScreen because the
+                // ROM gate short-circuits that composable before any haptic
+                // state is set up, and its import button needs the pulse too.
+                ProvideUiHaptics(enabled = uiHaptics) {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.Black) {
                     EmulatorScreen(
                         session = session,
@@ -87,6 +101,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.safeDrawingPadding(),
                     )
                 }
+                }
             }
         }
     }
@@ -96,6 +111,11 @@ class MainActivity : ComponentActivity() {
         if (intent.action == EmulatorSessionService.ACTION_SHUTDOWN) {
             shutdown()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        uiHaptics = session.interfaceHapticsEnabled
     }
 
     override fun onPause() {
