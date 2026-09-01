@@ -262,29 +262,6 @@ patch("fujinet_pc.cmake", [
         'endif()\n',
     ),
     (
-        'set(_MBEDTLS_ROOT_HINTS $ENV{MBEDTLS_ROOT_DIR} ${MBEDTLS_ROOT_DIR})\n'
-        'set(_MBEDTLS_ROOT_PATHS "$ENV{PROGRAMFILES}/libmbedtls")\n'
-        'set(_MBEDTLS_ROOT_HINTS_AND_PATHS HINTS ${_MBEDTLS_ROOT_HINTS} PATHS ${_MBEDTLS_ROOT_PATHS})\n'
-        'find_library(MBEDTLS_STATIC_LIB libmbedtls.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        'find_library(MBEDX509_STATIC_LIB libmbedx509.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        'find_library(MBEDCRYPTO_STATIC_LIB libmbedcrypto.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        'find_path(MBEDTLS_INCLUDE_DIR mbedtls/ssl.h HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS} PATH_SUFFIXES include)\n',
-        'if(FUJINET_ANDROID AND DEFINED MBEDTLS_ROOT_DIR)\n'
-        '    set(MBEDTLS_STATIC_LIB "${MBEDTLS_ROOT_DIR}/lib/libmbedtls.a")\n'
-        '    set(MBEDX509_STATIC_LIB "${MBEDTLS_ROOT_DIR}/lib/libmbedx509.a")\n'
-        '    set(MBEDCRYPTO_STATIC_LIB "${MBEDTLS_ROOT_DIR}/lib/libmbedcrypto.a")\n'
-        '    set(MBEDTLS_INCLUDE_DIR "${MBEDTLS_ROOT_DIR}/include")\n'
-        'else()\n'
-        '    set(_MBEDTLS_ROOT_HINTS $ENV{MBEDTLS_ROOT_DIR} ${MBEDTLS_ROOT_DIR})\n'
-        '    set(_MBEDTLS_ROOT_PATHS "$ENV{PROGRAMFILES}/libmbedtls")\n'
-        '    set(_MBEDTLS_ROOT_HINTS_AND_PATHS HINTS ${_MBEDTLS_ROOT_HINTS} PATHS ${_MBEDTLS_ROOT_PATHS})\n'
-        '    find_library(MBEDTLS_STATIC_LIB libmbedtls.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        '    find_library(MBEDX509_STATIC_LIB libmbedx509.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        '    find_library(MBEDCRYPTO_STATIC_LIB libmbedcrypto.a HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS})\n'
-        '    find_path(MBEDTLS_INCLUDE_DIR mbedtls/ssl.h HINTS ${_MBEDTLS_ROOT_HINTS_AND_PATHS} PATH_SUFFIXES include)\n'
-        'endif()\n',
-    ),
-    (
         'target_link_libraries(fujinet pthread expat cjson cjson_utils smb2 ssh nfs gumbo_fn)\n',
         'if(FUJINET_ANDROID)\n'
         '    set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)\n'
@@ -432,59 +409,6 @@ patch("lib/http/mgHttpClient.cpp", [
     ),
 ])
 
-# --- pc_rtos task shim: name worker threads after their FreeRTOS task ------
-patch("lib/compat/pc_rtos/pc_rtos.cpp", [
-    (
-        '#include <mutex>\n'
-        '#include <thread>\n',
-        '#include <mutex>\n'
-        '#include <pthread.h>\n'
-        '#include <thread>\n',
-    ),
-    (
-        'static BaseType_t pc_task_create(TaskFunction_t fn, void *arg, TaskHandle_t *out_handle)\n'
-        '{\n'
-        '    std::thread t([fn, arg] { fn(arg); });\n'
-        '    t.detach();\n',
-        'static BaseType_t pc_task_create(TaskFunction_t fn, const char *name, void *arg, TaskHandle_t *out_handle)\n'
-        '{\n'
-        '    std::thread t([fn, arg, name] {\n'
-        '        if (name && *name) {\n'
-        '            char tn[16];\n'
-        '            strncpy(tn, name, sizeof(tn) - 1);\n'
-        '            tn[sizeof(tn) - 1] = 0;\n'
-        '            pthread_setname_np(pthread_self(), tn);\n'
-        '        }\n'
-        '        fn(arg);\n'
-        '    });\n'
-        '    t.detach();\n',
-    ),
-    (
-        'extern "C" BaseType_t xTaskCreate(TaskFunction_t fn, const char *, uint32_t, void *arg,\n'
-        '                                  UBaseType_t, TaskHandle_t *out_handle)\n'
-        '{\n'
-        '    return pc_task_create(fn, arg, out_handle);\n'
-        '}\n',
-        'extern "C" BaseType_t xTaskCreate(TaskFunction_t fn, const char *name, uint32_t, void *arg,\n'
-        '                                  UBaseType_t, TaskHandle_t *out_handle)\n'
-        '{\n'
-        '    return pc_task_create(fn, name, arg, out_handle);\n'
-        '}\n',
-    ),
-    (
-        'extern "C" BaseType_t xTaskCreatePinnedToCore(TaskFunction_t fn, const char *, uint32_t, void *arg,\n'
-        '                                              UBaseType_t, TaskHandle_t *out_handle, BaseType_t)\n'
-        '{\n'
-        '    return pc_task_create(fn, arg, out_handle);\n'
-        '}\n',
-        'extern "C" BaseType_t xTaskCreatePinnedToCore(TaskFunction_t fn, const char *name, uint32_t, void *arg,\n'
-        '                                              UBaseType_t, TaskHandle_t *out_handle, BaseType_t)\n'
-        '{\n'
-        '    return pc_task_create(fn, name, arg, out_handle);\n'
-        '}\n',
-    ),
-], required=False)
-
 # --- Drop in the Android entry-point wrapper ------------------------------
 android_dir = clone_dir / "android"
 android_dir.mkdir(exist_ok=True)
@@ -562,6 +486,7 @@ build_mbedtls() {
         -DANDROID_PLATFORM="${ANDROID_PLATFORM:-android-26}" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="${mbedtls_install_dir}" \
+        -DCMAKE_INSTALL_LIBDIR=lib \
         -DENABLE_PROGRAMS=OFF \
         -DENABLE_TESTING=OFF \
         -DMBEDTLS_FATAL_WARNINGS=OFF \
