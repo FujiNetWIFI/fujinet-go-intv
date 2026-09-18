@@ -102,6 +102,8 @@ else
        "${INTV_DESKTOP_SRC}/core/src/intv_keymap.c" \
        "${INTV_DESKTOP_SRC}/core/src/bindings.c" \
        "${INTV_DESKTOP_SRC}/core/src/bindings.h" \
+       "${INTV_DESKTOP_SRC}/core/src/hid_keys.c" \
+       "${INTV_DESKTOP_SRC}/core/src/hid_keys.h" \
        "${INTV_DESKTOP_SRC}/core/src/session_internal.h" \
        "${INTV_DESKTOP_SRC}/core/src/compat.h" \
        "${INTV_DESKTOP_SRC}/core/src/roms_embedded.h" \
