@@ -9,8 +9,9 @@
 #   * Source is the user's LOCAL fujinet-firmware checkout (not a target-
 #     specific fork) -- fujinet-go-intv-desktop's own FujiNet build
 #     (cmake/FujiNetRuntime.cmake) also builds from third_party/fujinet-
-#     firmware, pinned at commit 13465cdd044304ff96ad41a5f029087b28bed17f
-#     (master) -- so this is the same source tree,
+#     firmware, pinned at commit c68e863034737611415ca568c3ea4607a2220c7e
+#     (tcp-protocol-disable-nagle, which is master plus the TCP_NODELAY
+#     commit) -- so this is the same source tree,
 #     not a different one. Note the asymmetry: the desktop pins a commit and
 #     this script takes whatever the checkout is on, so the two agree only
 #     when the local checkout sits on that pin. Keep this comment moving with

@@ -154,8 +154,8 @@ android {
         applicationId = "online.fujinet.go.intv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.0.12"
+        versionCode = 16
+        versionName = "1.0.13"
         buildConfigField("String", "JZINTV_VERSION", "\"${jzIntvVersion}\"")
         buildConfigField("String", "FUJINET_RUNTIME_VERSION", "\"${fujiNetRuntimeVersion}\"")
         buildConfigField("boolean", "DEV_ROMS", intvRoms.toString())

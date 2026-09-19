@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.13
+
+### Fixed
+- **Network connections no longer stall between messages.** The bundled FujiNet
+  runtime now turns off Nagle's algorithm on TCP sockets, in both directions --
+  on the socket the Intellivision connects out on, and on the one an incoming
+  connection is accepted on. N: traffic is small interactive writes: a request
+  goes out, a reply comes back. Nagle held each write back waiting for more
+  data to pack alongside it, and in a conversation like that the next data only
+  arrives after the reply it is waiting on, so every exchange paid for it.
+
+### Changed
+- **The bundled FujiNet runtime is rebuilt from upstream
+  (`c68e8630`).** It had been thirty-seven commits behind, so the device and
+  network unification, the Odyssey 2 and Macintosh 68k bringups and a round of
+  memory-leak and allocator fixes all arrive alongside the change above. The
+  pin is a branch rather than `master` because the TCP fix has not been merged
+  there yet.
+
+## 1.0.12
+
+### Changed
+- **The embedded CONFIG ROM is re-built with Mattel ECS keyboard support.**
+  1.0.11 taught the app to send what the ECS key caps say, but CONFIG itself
+  still only polled the hand controller, so nothing reached it. With ECS
+  enabled, arrow keys now move the selection, Return opens a host or a folder
+  and Escape goes back, and host names, directory filters, network names and
+  Wi-Fi passwords can be typed instead of spelled out one character at a time
+  on the on-screen character grid. While typing, the left arrow backspaces and
+  repeats when held; on the host slot screen, typing a letter starts renaming
+  that slot from the character typed. The character grid remains for the few
+  characters the ECS keyboard has no key for. ECS stays off unless turned on in
+  Settings, and the hand controller is unaffected.
+
 ## 1.0.11
 
 ### Changed
