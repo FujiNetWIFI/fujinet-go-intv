@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.14
+
+### Fixed
+- **JLP games can use FujiNet.** The emulated FujiNet mailbox sat on top of
+  JLP's `$8000-$9FFF` window, so a JLP game had no working mailbox and its
+  hardware multiply, divide, CRC and random numbers read zero. As on the real
+  cartridge, the mailbox now answers `$9C00-$9F3F` only, and a JLP game keeps
+  it when its `.cfg` has `[vars] fujinet = 1`; JLP has the rest of the window.
+  A JLP game without that line gets the whole window and no mailbox. Ported
+  from fujinet-go-intv-desktop
+  (FujiNetWIFI/fujinet-go-intv-desktop#3).
+
+### Changed
+- **The emulator core is restaged from the desktop app's current tree**
+  (0.14.0 plus the change above; it was last staged from 0.9.1). The Android
+  glue gains the two functions that core now expects
+  (`intvsession_has_ecs_rom`, `intvsession_parse_hostport`) and shares its
+  file helpers with it.
+
 ## 1.0.13
 
 ### Fixed

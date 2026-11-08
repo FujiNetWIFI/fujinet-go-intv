@@ -38,7 +38,7 @@ static int make_dir(const char *path)
     return mkdir(path, 0755);
 }
 
-static int mkdir_p(const char *path)
+int mkdir_p(const char *path)
 {
     char buf[INTV_PATH_MAX];
     char *p;
@@ -56,7 +56,7 @@ static int mkdir_p(const char *path)
     return 0;
 }
 
-static int is_file(const char *path)
+int is_file(const char *path)
 {
     struct stat st;
     return path && *path && stat(path, &st) == 0 && S_ISREG(st.st_mode);
@@ -131,6 +131,13 @@ int intvsession_has_system_roms(const intvsession *s)
     snprintf(exec_path, sizeof(exec_path), "%s/exec.bin", s->roms_dir);
     snprintf(grom_path, sizeof(grom_path), "%s/grom.bin", s->roms_dir);
     return is_file(exec_path) && is_file(grom_path);
+}
+
+int intvsession_has_ecs_rom(const intvsession *s)
+{
+    char ecs_path[INTV_PATH_MAX];
+    snprintf(ecs_path, sizeof(ecs_path), "%s/ecs.bin", s->roms_dir);
+    return is_file(ecs_path);
 }
 
 const char *intvsession_roms_path(const intvsession *s)
